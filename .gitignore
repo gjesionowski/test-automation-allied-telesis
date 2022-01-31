@@ -3,6 +3,13 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+<<<<<<< HEAD
+=======
+#Logs and other Archives
+logs/
+backups/
+
+>>>>>>> Create .gitignore
 # C extensions
 *.so
 
