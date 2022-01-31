@@ -1,0 +1,68 @@
+---
+- name: Initiate Chariot test based on user input and host facts
+  hosts: windowsendpoints,linuxendpoints
+  tasks:
+
+  - name: Add variables from test configuration
+    delegate_to: localhost
+    include_vars:
+      file: ~/testing/templates/testtemplatefilled.yml
+      name: config
+    run_once: true
+
+  - name: Display Test Configuration Details
+    delegate_to: localhost
+    debug:
+      var: config
+    run_once: true
+    
+  - name: Check processes on Linux endpoints
+    become: true
+    shell: ps a | grep endpoint | grep -v grep
+    register: processes
+    when:
+      - ansible_facts['os_family'] == "Debian"
+
+  - name: Verify Chariot Endpoint software is running on Linux endpoints
+    debug:
+      var: processes['stdout_lines']
+    when:
+      - ansible_facts['os_family'] == "Debian"
+      - processes['stdout_lines'][0] != "" 
+      
+  - name: Check processes on Windows endpoints
+    win_shell: Get-Service -Name "IxiaEnd*"
+    register: processeswindows
+    when:
+      - ansible_facts['os_family'] == "Windows"
+
+  - name: Verify Chariot Endpoint software is running on Windows endpoints
+    debug:
+      var: processeswindows['stdout_lines'][3]
+    when:
+      - ansible_facts['os_family'] == "Windows"
+      - "'IxiaEndpoint' in processeswindows['stdout_lines'][3]"
+      
+  - name: Set Debian interface speed
+    become: true
+    vars:
+      debmac: "{{ hostvars[inventory_hostname]['ansible_%s' | format(item)]['macaddress'] }}"    
+      goodints:
+        - enp1s0f1
+        - enp1s0f0
+    shell: ethtool -s "{{ item }}" speed "{{ config.speed }}"
+    when:
+      - ansible_facts['os_family'] == "Debian"
+      - item in goodints
+      - "'e0:1a:ea:' in debmac" # TODO: Edit these tests to include ec:cd:6d
+    with_items: "{{ ansible_interfaces }}"
+
+  - name: Set Windows interface speed
+    vars:
+      winmac: "{{ item.macaddress }}"
+    script: ~/testing/powershell/set-speed-on-allied-macs.ps1 
+    when:
+      - ansible_facts['os_family'] == "Windows"
+      - "'E0:1A:EA:' in winmac" # TODO: Edit these tests to include EC:CD:6D
+    with_items: "{{ ansible_interfaces }}"
+    register: winalliedmacs

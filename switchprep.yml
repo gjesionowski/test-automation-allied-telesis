@@ -1,0 +1,21 @@
+---
+- name: Initiate Switch configuration based on user input and host facts
+  hosts: switches
+  gather_facts: false
+  tasks:
+
+    - name: Run raw command to get configs
+      raw: show run
+      register: configs
+      
+    - name: Show running configs 
+      vars:
+        showrun: "{{ configs['stdout_lines'] | to_nice_json }}"
+      debug:
+        var: showrun
+        
+    - name: Set speed of l2 interface on switches
+      alliedtelesis.awplus.awplus_l2_interfaces:
+        config:
+          - name: port1.0.16
+            

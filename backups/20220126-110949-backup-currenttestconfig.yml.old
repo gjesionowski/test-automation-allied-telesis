@@ -1,0 +1,1 @@
+:::::::::::::: currenttestconfig.yml :::::::::::::: --- - vars: deviceid: speed: 1000 host1: 1 host2: 123 duration: 12 date: 20220126 time: 110447 status: 0

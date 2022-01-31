@@ -1,0 +1,14 @@
+
+
+
+items"results":{"macaddress":
+"E0:1A:EA:01:7B:A6","default_gateway":"192.162.1.1",
+"E0:1A:EA:01:7B:A6","changed":
+"E0:1A:EA:01:7B:A6","results":
+"E0:1A:EA:01:7B:A6",items
+"E0:1A:EA:01:7B:A6",completed","attest.com",
+"E0:1A:EA:01:7B:A6",completed","dns_domain":"Ethernet
+"E0:1A:EA:01:7B:A6","Ethernet
+"E0:1A:EA:01:7B:A6","Ethernet
+"E0:1A:EA:01:7B:A6","Ethernet2",
+"E0:1A:EA:01:7B:A6","Ethernet 2",
