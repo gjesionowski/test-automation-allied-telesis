@@ -8,6 +8,7 @@ __pycache__/
 #Logs and other Archives
 logs/
 backups/
+switchfiles/
 
 >>>>>>> Create .gitignore
 # C extensions
