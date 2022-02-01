@@ -1,1 +1,0 @@
-:::::::::::::: currenttestconfig.yml :::::::::::::: --- - vars: deviceid: mmc10gt speed: 10000 host1: windows01 host2: linux03 duration: 120 date: 20220126 time: 102230 status: 0

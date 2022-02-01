@@ -1,1 +1,0 @@
---- - vars: deviceid: DEVICE speed: 10000 host1: WINDOWS host2: LINUX duration: 120 date: 20220126 time: 112751 status: 0
