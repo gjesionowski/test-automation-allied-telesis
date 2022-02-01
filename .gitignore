@@ -5,21 +5,14 @@ __pycache__/
 
 <<<<<<< HEAD
 =======
->>>>>>> Create .gitignore
-# C extensions
-*.so
-
 #Logs and other Archives
 logs/
 backups/
 switchfiles/
-rawdata/
-cleandata/
-*.old
-*.bkp
-*.test
-*.testing
-*.old*
+
+>>>>>>> Create .gitignore
+# C extensions
+*.so
 
 # Distribution / packaging
 .Python
