@@ -1,9 +1,8 @@
----
-deviceid: 123
+deviceid: test
 speed: 10000
-host1: 123
-host2: 123
-duration: 123
-date: 20220131
-time: 144200
+host1: new
+host2: file
+duration: changed
+date: 20220201
+time: 100532
 status: 0

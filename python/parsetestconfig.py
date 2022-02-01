@@ -7,9 +7,9 @@ data = yaml.load(stream)
 
 shutil.copy('/home/pi/testing/templates/testtemplate.yml', '/home/pi/testing/templates/templatebackup.yml')
 
-# prints every key-value pair for user benefit
+# For every test value, populate the test template
 for k, v in data.items():
-	print 'looking for ' +k+ ', value: ' +str(v)+ ' ... updating configuration template...\n'
+	#print 'looking for ' +k+ ', value: ' +str(v)+ ' ... updating configuration template...\n'
 	temp = open('temp', 'wb')
 	with open('/home/pi/testing/templates/testtemplate.yml', 'r') as f:
     		for line in f:
