@@ -31,19 +31,7 @@ echo "Previous Configuration data saved to $filenamebackup in ~/testing/backups/
 echo "Current Configuration data  saved to $filename in ~/testing/";
 echo "Exiting with status code: $exitcode";
 
-echo "---" > $filename;
-#echo "- vars:" >> $filename;
-echo "deviceid: $uut" >> $filename;
-echo "speed: $speed" >> $filename;
-echo "host1: $host1" >> $filename;
-echo "host2: $host2" >> $filename;
-echo "duration: $duration" >> $filename;
-echo "date: $date" >> $filename;
-echo "time: $time" >> $filename;
-echo "status: $exitcode" >> $filename;
-
-#echo "  duplex: $duplex" >> $filename;
-# " " for all other variables if needed
+printf '%s\n' "deviceid: $uut" "speed: $speed" "host1: $host1" "host2: $host2" "duration: $duration" "date: $date" "time: $time" "status: $exitcode" | tee $filename;
 
 # Backup old test configuration to backup folder, 
 #   parse values from the new config
