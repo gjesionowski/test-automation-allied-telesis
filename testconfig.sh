@@ -9,7 +9,8 @@ duration=$(dialog --title "Test Configuration" --inputbox "Enter the duration (i
 speed=$(dialog --title "Test Configuration" --radiolist "Select (with Space) the test speed [1000 default] and press Enter:" 14 60 3 2>&1 1>&3 \
 100 "Mbps" off \
 1000 "Mbps" on \
-10000 "Mbps" off );
+10000 "Mbps" off  \
+auto "Autonegotiate" off );
 #duplex=$(dialog --inputbox "Enter the duplex of the test connection:" 0 0 2>&1 1>&3);
 #cable1=$(dialog --inputbox "Enter the type of cable connecting UUT to Switch A:" 0 0 2>&1 1>&3);
 #cable2=$(dialog --inputbox "Enter the type of cable connecting UUT to Switch B:" 0 0 2>&1 1>&3);
