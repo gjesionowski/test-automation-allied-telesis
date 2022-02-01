@@ -23,7 +23,7 @@ time=$(date +%H%M%S);
 filenamemain=currenttestconfig.yml;
 filenamebackup=$date-$time-backup-$filenamemain.old;
 
-echo $(more $filenamemain) >> ~/testing/backups/$filenamebackup;
+printf '%s' "$(cat $filenamemain)" | tee ~/testing/backups/$filenamebackup;
 
 filename=$filenamemain;
 
