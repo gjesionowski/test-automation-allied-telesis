@@ -1,8 +1,8 @@
-deviceid: checking
-speed: 10000
-host1: lasttime
-host2: hopefully
-duration: 120
+deviceid: sfgs
+speed: 
+host1: sdrg
+host2: arg
+duration: ar2
 date: 20220201
-time: 110642
-status: 0
+time: 113230
+status: 1
