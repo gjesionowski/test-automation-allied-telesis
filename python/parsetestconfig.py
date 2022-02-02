@@ -9,14 +9,14 @@ shutil.copy('/home/pi/testing/templates/testtemplate.yml', '/home/pi/testing/tem
 
 # For every test value, populate the test template
 for k, v in data.items():
-	print 'looking for ' +k+ ', value: ' +str(v)+ ' ... updating configuration template...\n'
+	#print 'looking for ' +k+ ', value: ' +str(v)+ ' ... updating configuration template...\n'
 	temp = open('temp', 'wb')
 	with open('/home/pi/testing/templates/testtemplate.yml', 'r') as f:
     		for line in f:
 			#Find content in line, append data from test config
         		if line.startswith(str(k)):
             			line = line.strip() + ' ' + str(v) + '\n'
-				print line.strip()
+				#print line.strip()
 			temp.write(line)
 			#print line
 	shutil.move('temp', '/home/pi/testing/templates/testtemplate.yml')
