@@ -21,7 +21,7 @@ exitcode=$?;
 exec 3>&-;
 time=$(date +%H%M%S);
 
-filenamemain=currenttestconfig.yml;
+filenamemain=~/testing/yaml/currenttestconfig.yml;
 filenamebackup=$date-$time-backup-$filenamemain.old;
 
 #printf '%s' "$(cat $filenamemain)" | tee ~/testing/backups/$filenamebackup;
@@ -42,4 +42,4 @@ python ~/testing/python/parsetestconfig.py
 
 # Enter the Ansible playbook. 
 #   Multiple Passwords required for encryption and escalation
-ansible-playbook ~/testing/test.yml --ask-become-pass --ask-vault-pass -vvv
+ansible-playbook ~/testing/yaml/test.yml --ask-become-pass --ask-vault-pass -v
