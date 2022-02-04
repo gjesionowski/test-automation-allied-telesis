@@ -45,10 +45,7 @@ echo "Current Configuration data saved to $yamldir$filename";
 echo "Exiting with status code: $exitcode";
 echo " ... "
 
-## Backup old test configuration to backup folder, 
-## Parse values from the new config
-python ~/testing/python/parsetestconfig.py
-
-## Enter the Ansible playbook. 
+## Enter the main testing Ansible playbook. 
 ## Multiple Passwords required for encryption and escalation
-ansible-playbook ~/testing/yaml/test.yml --ask-become-pass --ask-vault-pass -v
+## Ask permission for each step of the way
+ansible-playbook ~/testing/yaml/test.yml --ask-become-pass --ask-vault-pass -v --step
