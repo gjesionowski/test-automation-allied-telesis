@@ -11,6 +11,7 @@ backups/
 switchfiles/
 data/
 group_vars/
+python/
 
 >>>>>>> Create .gitignore
 # C extensions

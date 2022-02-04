@@ -13,14 +13,14 @@ set output '/home/pi/testing/backups/$check-graph.png'
 set datafile sep ","
 set xlabel "Elapsed Time (minutes)"
 set ylabel "Total (Errors and Packets)"
-set xtics 360 rotate by -30 offset -1
-set mxtics 6
-set ytics 100
-set mytics 2
+set xtics 60 rotate by -30 offset -1
+set mxtics 4
+#set ytics 1000
+#set mytics 2
 set style line 8 lc rgb "gray50" lw 0.5 lt 1
 set style line 4 lc rgb "gray80" lw 0.5 lt 1
 set grid mxtics mytics xtics ytics ls 8, ls 4
-FACTOR=0.000000001
+FACTOR=1 #FACTOR=0.000000001
 plot \
 '/home/pi/testing/data/$currentdata' using 0:2 t "FCS Errors" w lines, \
 '/home/pi/testing/data/$currentdata' using 0:(\$3*FACTOR) t "Packets" w lines

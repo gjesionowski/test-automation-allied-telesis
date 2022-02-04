@@ -6,7 +6,7 @@
   - name: Add variables from test configuration
     delegate_to: localhost
     include_vars:
-      file: ~/testing/templates/testtemplatefilled.yml
+      file: ~/testing/yaml/currenttestconfig.yml
       name: config
     run_once: true
 
