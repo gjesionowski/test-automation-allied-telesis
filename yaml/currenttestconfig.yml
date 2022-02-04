@@ -1,8 +1,8 @@
-deviceid: Test
-speed: 1000
-host1: test
-host2: test
-duration: test
-date: 20220203
-time: 150440
+deviceid: 123
+speed: auto
+host1: 456
+host2: 789
+duration: 120
+date: 220204
+time: 103142
 status: 0
