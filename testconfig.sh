@@ -11,6 +11,7 @@ speed=$(dialog --title "Test Configuration" --radiolist "Select (with Space) the
 1000 "Mbps, Full Duplex" off \
 10000 "Mbps, Full Duplex" off  \
 auto "Auto-negotiate" on );
+octet=$(dialog --title "Test Configuration" --inputbox "Enter the last octet of the switch IP [i.e. xx in 192.162.1.xx]:" 0 0 2>&1 1>&3);
 ##### These values are not needed yet ;; Will need to add port number options for data trigger automation
 #duplex=$(dialog --inputbox "Enter the duplex of the test connection:" 0 0 2>&1 1>&3);
 #cable1=$(dialog --inputbox "Enter the type of cable connecting UUT to Switch A:" 0 0 2>&1 1>&3);
@@ -48,4 +49,4 @@ echo " ... "
 ## Enter the main testing Ansible playbook. 
 ## Multiple Passwords required for encryption and escalation
 ## Ask permission for each step of the way
-ansible-playbook ~/testing/yaml/test.yml --ask-become-pass --ask-vault-pass -v --step
+ansible-playbook ~/testing/yaml/test.yml --ask-become-pass --ask-vault-pass -v --step --extra-vars "host1=$host1 host2=$host2 switch=192.162.1.$octet"

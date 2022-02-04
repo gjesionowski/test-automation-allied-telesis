@@ -15,7 +15,7 @@ set xlabel "Elapsed Time (minutes)"
 set ylabel "Total (Errors and Packets)"
 set xtics 60 rotate by -30 offset -1
 set mxtics 4
-#set ytics 1000
+#set ytics 10000
 #set mytics 2
 set style line 8 lc rgb "gray50" lw 0.5 lt 1
 set style line 4 lc rgb "gray80" lw 0.5 lt 1
