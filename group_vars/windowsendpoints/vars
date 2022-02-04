@@ -1,2 +1,0 @@
----
-winrm_pass: "{{ vault_winrm_pass }}"
