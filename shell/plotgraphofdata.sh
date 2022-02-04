@@ -1,5 +1,5 @@
 #! /usr/bin/env bash
-currentdata=$(ls -t ~/testing/data/*.dat | head -n1)
+currentdata=$(ls -t ~/testing/data/ | grep clean | head -n1)
 # Gets the first field (time data) from the first record in the data
 startdate=$(echo $(head -n1 $currentdata) | sed 's/,.*//')
 enddate=$(echo $(head -n1 $currentdata) | sed 's/,.*//')
