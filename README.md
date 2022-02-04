@@ -1,5 +1,5 @@
 # hardware-test-automation
-A collection of Ansible playbooks, and scripts (Python, Bash, and PowerShell) for automating network adapter configuration and switch data processing on Allied Telesis hardware and the AlliedWare Plus operating system. 
+A collection of Ansible playbooks, and scripts (Bash and PowerShell) for automating network adapter configuration and switch data processing on Allied Telesis hardware and the AlliedWare Plus operating system. 
 
 This project is under continuous development. 
 
