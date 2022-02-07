@@ -12,17 +12,14 @@ speed=$(dialog --title "Test Configuration" --radiolist "Select (with Space) the
 10000 "Mbps, Full Duplex" off  \
 auto "Auto-negotiate" on );
 octet=$(dialog --title "Test Configuration" --inputbox "Enter the last octet of the switch IP [i.e. xx in 192.162.1.xx]:" 0 0 2>&1 1>&3);
-##### These values are not needed yet ;; Will need to add port number options for data trigger automation
-#duplex=$(dialog --inputbox "Enter the duplex of the test connection:" 0 0 2>&1 1>&3);
-#cable1=$(dialog --inputbox "Enter the type of cable connecting UUT to Switch A:" 0 0 2>&1 1>&3);
-#cable2=$(dialog --inputbox "Enter the type of cable connecting UUT to Switch B:" 0 0 2>&1 1>&3);
-#cable1length=$(dialog --inputbox "Enter the length (meters) of the cable connecting UUT to Switch A:" 0 0 2>&1 1>&3);
-#cable2length=$(dialog --inputbox "Enter the length (meters) of the cable connecting UUT to Switch B:" 0 0 2>&1 1>&3);
-
-# Store exit code for later debugging purposes
-exitcode=$?;
-# Close stream 3
+port1=$(dialog --title "Test Configuration" --inputbox "Enter the first switch port to monitor [i.e. xx in port1.0.xx]:" 0 0 2>&1 1>&3);
+cable1=$(dialog --inputbox "Enter the type of cable connected to first switch port:" 0 0 2>&1 1>&3);
+cable1length=$(dialog --inputbox "Enter the length (meters) of the cable connected to first switch port:" 0 0 2>&1 1>&3);
+port2=$(dialog --title "Test Configuration" --inputbox "Enter the second switch port to monitor [i.e. xx in port1.0.xx]:" 0 0 2>&1 1>&3);
+cable2=$(dialog --inputbox "Enter the type of cable connected to second switch port" 0 0 2>&1 1>&3);
+cable2length=$(dialog --inputbox "Enter the length (meters) of the cable connected to second switch port:" 0 0 2>&1 1>&3);
 exec 3>&-;
+
 # Time/date used to create unique filenames for now
 time=$(date +%H%M%S);
 date=$(date +%y%m%d);
@@ -37,16 +34,15 @@ filename=$filenamemain;
 # Backs up old config -> Remains to be seen if this is necessary
 printf '%s\n' "$(cat $yamldir$filenamemain)" | tee $backupdir$filenamebackup;
 # Writes the new config
-printf '%s\n' "deviceid: $uut" "host1: $host1" "host2: $host2" "duration: $duration" "speed: $speed" "date: $date" "time: $time" "status: $exitcode" | tee $yamldir$filename;
+printf '%s\n' "deviceid: $uut" "host1: $host1" "host2: $host2" "duration: $duration" "speed: $speed" "date: $date" "time: $time" "switch1: 192.162.1.$octet" "port1: $port1" "port2: $port2" | tee $yamldir$filename;
 
 # Debugging and user benefit
 echo " ... "
 echo "Previous Configuration data saved to $backupdir$filenamebackup";
 echo "Current Configuration data saved to $yamldir$filename";
-echo "Exiting with status code: $exitcode";
 echo " ... "
 
 ## Enter the main testing Ansible playbook. 
 ## Multiple Passwords required for encryption and escalation
 ## Ask permission for each step of the way
-ansible-playbook ~/testing/yaml/test.yml --ask-become-pass --ask-vault-pass -v --step --extra-vars "host1=$host1 host2=$host2 switch=192.162.1.$octet"
+ansible-playbook --ask-become-pass --ask-vault-pass -vvv --step ~/testing/yaml/test.yml

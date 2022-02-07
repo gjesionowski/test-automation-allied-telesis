@@ -1,8 +1,10 @@
-deviceid: TESTING
-host1: PARSE
-host2: CHANGES
-duration: 1441
+deviceid: as
+host1: sd
+host2: sd
+duration: df
 speed: auto
-date: 220204
-time: 120222
-status: 0
+date: 220207
+time: 113633
+switch1: 192.162.1.df
+port1: df
+port2: df
