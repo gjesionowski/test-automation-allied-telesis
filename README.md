@@ -16,6 +16,6 @@ This project is under continuous development.
 ## Requirements 
 
 - ansible.netcommon
-```ansible-galaxy collection install ansible.netcommon```
+  - ```ansible-galaxy collection install ansible.netcommon```
 - ansible awplus collection
-```ansible-galaxy collection install alliedtelesis.awplus```
+  - ```ansible-galaxy collection install alliedtelesis.awplus```
