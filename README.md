@@ -3,7 +3,7 @@ A collection of Ansible playbooks, and scripts (Bash and PowerShell) for automat
 
 This project is under continuous development. 
 
---Key Points--
+## Key Points--
 
 - Begins with running testconfig.sh
   - This accepts and records user input
@@ -13,9 +13,9 @@ This project is under continuous development.
   - Network adapters, switch ports, and scripting to monitor Key Performance Indicators (KPIs) during tests.
 - Gnuplot and other open source technologies will allow for the collected data to automatically be processed into human-readable graphs. 
 
---Requirements--
+## Requirements 
 
 - ansible.netcommon
-'''ansible-galaxy collection isntall ansible.netcommon'''
+```ansible-galaxy collection install ansible.netcommon```
 - ansible awplus collection
-'''ansible-galaxy collection install alliedtelesis.awplus'''
+```ansible-galaxy collection install alliedtelesis.awplus```
