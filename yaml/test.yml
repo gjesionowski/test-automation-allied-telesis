@@ -1,6 +1,6 @@
 ---
 - name: Initiate Chariot test based on user input and host facts
-  hosts: windowsendpoints,linuxendpoints
+  hosts: switches, windowsendpoints,linuxendpoints
   tasks:
 
   - name: Add variables from test configuration
