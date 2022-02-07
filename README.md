@@ -3,7 +3,7 @@ A collection of Ansible playbooks, and scripts (Bash and PowerShell) for automat
 
 This project is under continuous development. 
 
-## Key Points--
+## Key Points
 
 - Begins with running testconfig.sh
   - This accepts and records user input
