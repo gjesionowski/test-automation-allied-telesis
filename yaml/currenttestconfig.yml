@@ -1,10 +1,10 @@
-deviceid: as
-host1: sd
-host2: sd
-duration: df
+deviceid: se
+host1: ef
+host2: ef
+duration: ef
 speed: auto
 date: 220207
-time: 113633
-switch1: 192.162.1.df
-port1: df
-port2: df
+time: 134614
+switch1: switch131
+port1: 1
+port2: 

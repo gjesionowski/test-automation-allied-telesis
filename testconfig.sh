@@ -32,10 +32,15 @@ filenamebackup=$date-$time-backup-$filenamemain.old;
 filename=$filenamemain;
 
 # Backs up old config -> Remains to be seen if this is necessary
+echo " ... "
+echo "Previous Configuration data"
 printf '%s\n' "$(cat $yamldir$filenamemain)" | tee $backupdir$filenamebackup;
+echo " ... "
 # Writes the new config
-printf '%s\n' "deviceid: $uut" "host1: $host1" "host2: $host2" "duration: $duration" "speed: $speed" "date: $date" "time: $time" "switch1: 192.162.1.$octet" "port1: $port1" "port2: $port2" | tee $yamldir$filename;
-
+echo " ... "
+echo "Current Configuration data"
+printf '%s\n' "deviceid: $uut" "host1: $host1" "host2: $host2" "duration: $duration" "speed: $speed" "date: $date" "time: $time" "switch1: switch$octet" "port1: $port1" "port2: $port2" | tee $yamldir$filename;
+echo " ... "
 # Debugging and user benefit
 echo " ... "
 echo "Previous Configuration data saved to $backupdir$filenamebackup";

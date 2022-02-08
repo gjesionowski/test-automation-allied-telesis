@@ -1,6 +1,6 @@
 ---
 - name: Initiate Chariot test based on user input and host facts
-  hosts: windowsendpoints,linuxendpoints
+  hosts: switches, windowsendpoints,linuxendpoints
   tasks:
 
   - name: Add variables from test configuration
@@ -15,7 +15,17 @@
     debug:
       var: config
     run_once: true
-    
+
+  - name: Gather AWPlus switch facts
+    connection: network_cli
+    delegate_to: "{{ config.switch1 }}"
+    alliedtelesis.awplus.awplus_facts: 
+      gather_subset: all
+      gather_network_resources: all
+    register: switchfacts
+    run_once: true
+
+
   - name: Check processes on Linux endpoints
     become: true
     shell: ps a | grep endpoint | grep -v grep
@@ -61,9 +71,20 @@
     vars:
       winmac: "{{ item.macaddress }}"
       runme: ~/testing/powershell/set-speed-{{config.speed}}-on-allied-macs.ps1 # <Do NOT use quotation marks here
-    ansible.builtin.script: "{{runme}}" #{{ runme }} < This is wrong, use quotation marks
+    ansible.builtin.script: "{{runme}}" #{{ runme }} < This would be wrong, use quotation marks
     when:
       - ansible_facts['os_family'] == "Windows"
       - "'E0:1A:EA:' in winmac" # TODO: Edit these tests to include EC:CD:6D
     with_items: "{{ ansible_interfaces }}"
     register: winalliedmacs
+
+  - name: Set Switch port speeds
+    delegate_to: "{{ config.switch1 }}"
+    vars: 
+      switchhostname: "{{ config.switch1 }}"
+      speed: "{{ config.speed }}"
+      porta: "{{ config.port1 }}"
+      portb: "{{ config.port2 }}"
+    alliedtelesis.awplus.awplus_l2_interfaces:
+      config:
+    run_once: true
