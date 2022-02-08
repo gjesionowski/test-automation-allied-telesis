@@ -39,7 +39,7 @@ echo " ... "
 # Writes the new config
 echo " ... "
 echo "Current Configuration data"
-printf '%s\n' "deviceid: $uut" "host1: $host1" "host2: $host2" "duration: $duration" "speed: $speed" "date: $date" "time: $time" "switch1: 192.162.1.$octet" "port1: $port1" "port2: $port2" | tee $yamldir$filename;
+printf '%s\n' "deviceid: $uut" "host1: $host1" "host2: $host2" "duration: $duration" "speed: $speed" "date: $date" "time: $time" "switch1: switch$octet" "port1: $port1" "port2: $port2" | tee $yamldir$filename;
 echo " ... "
 # Debugging and user benefit
 echo " ... "

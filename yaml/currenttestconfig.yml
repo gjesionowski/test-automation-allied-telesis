@@ -1,10 +1,10 @@
-deviceid: ssef
-host1: sef
-host2: sef
-duration: sef
+deviceid: se
+host1: ef
+host2: ef
+duration: ef
 speed: auto
 date: 220207
-time: 131753
-switch1: 192.162.1.sef
-port1: sef
-port2: sef
+time: 134614
+switch1: switch131
+port1: 1
+port2: 

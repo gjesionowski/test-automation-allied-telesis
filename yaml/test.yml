@@ -16,22 +16,15 @@
       var: config
     run_once: true
 
-  - name: Print all facts for debugging
-    debug:
-      var: ansible_facts
-
-  - name: Test fact gathering from AWPlus switches
+  - name: Gather AWPlus switch facts
     connection: network_cli
-    delegate_to: switch131
+    delegate_to: "{{ config.switch1 }}"
     alliedtelesis.awplus.awplus_facts: 
-      gather_network_resources: all
       gather_subset: all
+      gather_network_resources: all
     register: switchfacts
     run_once: true
 
-  - name: Test display AWPlus switch facts
-    debug:
-      var: switchfacts
 
   - name: Check processes on Linux endpoints
     become: true
@@ -85,11 +78,13 @@
     with_items: "{{ ansible_interfaces }}"
     register: winalliedmacs
 
-  #- name: Set Switch port speeds
-    #vars: 
-      #switchip: "{{ config.switch }}"
-      #speed: "{{ config.speed }}"
-      #porta: "{{ config.port1 }}"
-      #portb: "{{ config.port2 }}"
-    #when: 
-      #- ansible_facts['os_family'] == "debian"
+  - name: Set Switch port speeds
+    delegate_to: "{{ config.switch1 }}"
+    vars: 
+      switchhostname: "{{ config.switch1 }}"
+      speed: "{{ config.speed }}"
+      porta: "{{ config.port1 }}"
+      portb: "{{ config.port2 }}"
+    alliedtelesis.awplus.awplus_l2_interfaces:
+      config:
+    run_once: true

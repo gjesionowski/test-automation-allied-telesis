@@ -9,7 +9,7 @@ awk 'BEGIN{RS="Switch Port Counters"}{print $242"/"$258","$65","$61}' /home/pi/t
 echo "The data formatting finished with status $?"
 cd /home/pi/testing/shell
 pwd
-./timelessplotgraphofdata.sh
+./factoredplotgraphofdata.sh
 echo "The data graphing finished with status $?"
 cd /home/pi/testing/backups
 pwd
