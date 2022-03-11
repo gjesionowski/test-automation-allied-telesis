@@ -6,7 +6,7 @@ check12=$(date +%H%M%S)
 # Gets user input
 printf "Which switch is being monitored? [i.e. 131, 133]  -> "
 read SWITCH
-printf "Which port is being monitored on that switch? [i.e. 1, 15]  -> "
+printf "Which port data is needed [i.e. 1, 15]  -> "
 read PORT
 echo "Gathering and graphing data from port $PORT on switch @ 192.162.1.$SWITCH ..."
 
@@ -38,6 +38,8 @@ set xtics 360 rotate by -30 offset -0.5
 set mxtics 6
 set y2tics 10
 set my2tics 10
+#set yrange [0:100]
+set xrange [0:1440]
 set y2range [0:*]
 set ytics nomirror
 #set mytics 2

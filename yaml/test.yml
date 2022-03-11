@@ -16,29 +16,42 @@
       var: config
     run_once: true
 
-  - name: Gather AWPlus switch facts
-    connection: network_cli
+  - name: Set Switch port speeds
     delegate_to: "{{ config.switch1 }}"
-    alliedtelesis.awplus.awplus_facts: 
-      gather_subset: all
-      gather_network_resources: all
-    register: switchfacts
+    vars: 
+      switchhostname: "{{ config.switch1 }}"
+      speed: "{{ config.speed }}"
+      porta: "{{ config.port1 }}"
+      portb: "{{ config.port2 }}"
+    alliedtelesis.awplus.awplus_command:
+      commands:
+        - command: enable
+        - command: sho ru
     run_once: true
 
+  #- name: Gather AWPlus switch facts
+    #connection: network_cli
+    #delegate_to: "{{ config.switch1 }}"
+    #alliedtelesis.awplus.awplus_facts: 
+      #gather_subset: all
+      #gather_network_resources: all
+    #register: switchfacts
+    #run_once: true
 
-  - name: Check processes on Linux endpoints
-    become: true
-    shell: ps a | grep endpoint | grep -v grep
-    register: processes
-    when:
-      - ansible_facts['os_family'] == "Debian"
 
-  - name: Verify Chariot Endpoint software is running on Linux endpoints
-    debug:
-      var: processes['stdout_lines']
-    when:
-      - ansible_facts['os_family'] == "Debian"
-      - processes['stdout_lines'][0] != "" 
+  #- name: Check processes on Linux endpoints
+    #become: true
+    #shell: ps a | grep endpoint | grep -v grep
+    #register: processes
+    #when:
+      #- ansible_facts['os_family'] == "Debian"
+
+  #- name: Verify Chariot Endpoint software is running on Linux endpoints
+    #debug:
+      #var: processes['stdout_lines']
+    #when:
+      #- ansible_facts['os_family'] == "Debian"
+      #- processes['stdout_lines'][0] != "" 
       
   - name: Check processes on Windows endpoints
     win_shell: Get-Service -Name "IxiaEnd*"
@@ -53,24 +66,24 @@
       - ansible_facts['os_family'] == "Windows"
       - "'IxiaEndpoint' in processeswindows['stdout_lines'][3]"
       
-  - name: Set Debian interface speed
-    become: true
-    vars:
-      debmac: "{{ hostvars[inventory_hostname]['ansible_%s' | format(item)]['macaddress'] }}"    
-      goodints:
-        - enp1s0f1
-        - enp1s0f0
-    shell: ethtool -s "{{ item }}" speed "{{ config.speed }}"
-    when:
-      - ansible_facts['os_family'] == "Debian"
-      - item in goodints
-      - "'e0:1a:ea:' in debmac" # TODO: Edit these tests to include ec:cd:6d
-    with_items: "{{ ansible_interfaces }}"
+  #- name: Set Debian interface speed
+    #become: true
+    #vars:
+      #debmac: "{{ hostvars[inventory_hostname]['ansible_%s' | format(item)]['macaddress'] }}"    
+      #goodints:
+        #- enp1s0f1
+        #- enp1s0f0
+    #shell: ethtool -s "{{ item }}" speed "{{ config.speed }}"
+    #when:
+      #- ansible_facts['os_family'] == "Debian"
+      #- item in goodints
+      #- "'e0:1a:ea:' in debmac" # TODO: Edit these tests to include ec:cd:6d
+    #with_items: "{{ ansible_interfaces }}"
 
   - name: Set Windows interface speed
     vars:
       winmac: "{{ item.macaddress }}"
-      runme: ~/testing/powershell/set-speed-{{config.speed}}-on-allied-macs.ps1 # <Do NOT use quotation marks here
+      runme: ~/testing/powershell/set-speed-{{config.speed}}-on-allied-macs.ps1 # <Do NOT use quotation marks around the curly braces here
     ansible.builtin.script: "{{runme}}" #{{ runme }} < This would be wrong, use quotation marks
     when:
       - ansible_facts['os_family'] == "Windows"
@@ -85,6 +98,14 @@
       speed: "{{ config.speed }}"
       porta: "{{ config.port1 }}"
       portb: "{{ config.port2 }}"
-    alliedtelesis.awplus.awplus_l2_interfaces:
-      config:
+    alliedtelesis.awplus.awplus_command:
+      commands:
+        - command: enable
+        - command: con t
+        - command: int port1.0.{{porta}}
+        - command: speed {{speed}}
+        - command: duplex full
+        - command: int port1.0.{{portb}}
+        - command: speed {{speed}}
+        - command: duplex full
     run_once: true
