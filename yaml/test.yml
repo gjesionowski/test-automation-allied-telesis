@@ -1,6 +1,6 @@
 ---
 - name: Initiate Chariot test based on user input and host facts
-  hosts: switches, windowsendpoints,linuxendpoints
+  hosts: switches, windowsendpoints # linuxendpoints
   tasks:
 
   - name: Add variables from test configuration
@@ -16,7 +16,7 @@
       var: config
     run_once: true
 
-  - name: Set Switch port speeds
+  - name: Get running switch config, switch 1
     delegate_to: "{{ config.switch1 }}"
     vars: 
       switchhostname: "{{ config.switch1 }}"
@@ -109,3 +109,15 @@
         - command: speed {{speed}}
         - command: duplex full
     run_once: true
+    
+  - name: Run Chariot at test speed between endpoints
+    delegate_to: windows01.attest.com
+    win_shell: |
+      $temppath = "C:\Users\Test\Desktop\ChariotScriptingFiles\Chariot1Gb122to123.ps1"
+      $filepresent = Test-Path -Path $temppath
+      if ($filepresent) {
+          Set-ExecutionPolicy Unrestricted -Scope Process
+          C:\Users\Test\Desktop\ChariotScriptingFiles\Chariot1Gb122to123.ps1
+      }
+    when:
+      - ansible_facts['os_family'] == "Windows"

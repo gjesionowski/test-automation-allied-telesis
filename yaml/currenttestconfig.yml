@@ -1,10 +1,10 @@
-deviceid: mmcd
-host1: 121
-host2: 111
-duration: 60
+deviceid: DURABLE
+host1: windows01
+host2: testpc1
+duration: 1
 speed: 1000
-date: 220311
-time: 153836
+date: 220314
+time: 124633
 switch1: switch133
 port1: 1
 port2: 3
