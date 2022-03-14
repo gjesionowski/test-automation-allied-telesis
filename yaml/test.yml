@@ -1,6 +1,6 @@
 ---
 - name: Initiate Chariot test based on user input and host facts
-  hosts: switches, windowsendpoints # linuxendpoints
+  hosts: switches, windowsendpoints, windowsserver # linuxendpoints
   tasks:
 
   - name: Add variables from test configuration
@@ -18,7 +18,7 @@
 
   - name: Get running switch config, switch 1
     delegate_to: "{{ config.switch1 }}"
-    vars: 
+    vars:
       switchhostname: "{{ config.switch1 }}"
       speed: "{{ config.speed }}"
       porta: "{{ config.port1 }}"
