@@ -75,4 +75,4 @@ echo " ... "
 ## Enter the main testing Ansible playbook. This may be split up into multiple playbooks soon because of increasing complexity. 
 ## Multiple Passwords required for encryption and escalation (--ask-become-pass & --ask-vault-pass)
 ## Ask permission for each step of the way (--step)
-ansible-playbook --ask-become-pass --ask-vault-pass -vvv ~/testing/yaml/test.yml
+ansible-playbook --ask-become-pass --ask-vault-pass ~/testing/yaml/test.yml
