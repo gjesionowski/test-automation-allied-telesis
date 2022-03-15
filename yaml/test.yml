@@ -172,7 +172,7 @@
         set xlabel "Elapsed Time (minutes)"
         set ylabel "Total Packets (millions)"
         set y2label "Total FCS Errors"
-        set xtics {{config.duration}} rotate by -30 offset -0.5
+        set xtics 30 rotate by -30 offset -0.5
         set mxtics 6
         set y2tics 10
         set my2tics 10
@@ -211,7 +211,7 @@
         set xlabel "Elapsed Time (minutes)"
         set ylabel "Total Packets (millions)"
         set y2label "Total FCS Errors"
-        set xtics {{config.duration}} rotate by -30 offset -0.5
+        set xtics 30 rotate by -30 offset -0.5
         set mxtics 6
         set y2tics 10
         set my2tics 10
