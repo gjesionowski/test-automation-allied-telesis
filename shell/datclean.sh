@@ -23,7 +23,7 @@ cd /home/pi/testing/shell
 currentdata=$(ls -t ~/testing/data/ | grep clean | head -n1)
 echo $currentdata
 
-# Graphs the most recent data file, saves with switch/port/time
+# Graphs the most recent data file, saves with switch/port/time < ADD DEVICE ID, possibly serial number
 gnuplot -p <<EOF
 set title "FCS Errors and Total Packets\n{/*0.6 Switch $SWITCH - Port $PORT - from datafile $currentdata}" # Set subtitle at half font size
 set terminal pngcairo dashed

@@ -22,10 +22,11 @@ duration=$(dialog --title "$uut Test Configuration: Test Duration" --radiolist "
 2880 "Minutes (2 days)" off \
 5760 "Minutes (4 days)" off \
 );
-testlist=$(dialog --title "$uut Test Configuration: Test Duration" --separate-output --checklist "Select (with Space) the tests to be ran: [Default: 15 Minutes]" 20 60 15 2>&1 1>&3 \
+# --separate-output < This option separates the output onto individual lines, breaking YAML formatting without further work
+testlist=$(dialog --title "$uut Test Configuration: Test Duration" --checklist "Select (with Space) the tests to be ran: [Default: 15 Minutes]" 20 60 15 2>&1 1>&3 \
 1 "Jumbo Frames" on \
 2 Wake-on-LAN on \
-3 Throughput on
+3 Throughput on \
 4 HLK off  \
 );
 speed=$(dialog --title "$uut Test Configuration: Speed Setting" --radiolist "Select (with Space) the test speed and press Enter [Default: Auto-negotiate]:" 20 60 7 2>&1 1>&3 \
@@ -62,7 +63,7 @@ echo " ... "
 # Writes the new config
 echo " ... "
 echo "Current Configuration data"
-printf '%s\n' "deviceid: $uut" "host1: $host1" "host2: $host2" "duration: $duration" "speed: $speed" "date: $date" "time: $time" "switch1: switch$octet" "port1: $port1" "port2: $port2" "options: $testlist" | tee $yamldir$filename;
+printf '%s\n' "deviceid: $uut" "host1: $host1" "host2: $host2" "duration: $duration" "speed: $speed" "date: $date" "time: $time" "switch1: $octet" "port1: $port1" "port2: $port2" "options: $testlist" | tee $yamldir$filename;
 #ORIGINAL: printf '%s\n' "deviceid: $uut" "host1: $host1" "host2: $host2" "duration: $duration" "speed: $speed" "date: $date" "time: $time" "switch1: switch$octet" "port1: $port1" "port2: $port2" | tee $yamldir$filename;
 echo " ... "
 # Debugging and user benefit
