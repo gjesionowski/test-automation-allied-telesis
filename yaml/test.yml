@@ -1,6 +1,6 @@
 ---
 - name: Initiate Chariot test based on user input and host facts
-  hosts: switches, windowsendpoints,linuxendpoints
+  hosts: switches, windowsendpoints, windowsserver # linuxendpoints
   tasks:
 
   - name: Add variables from test configuration
@@ -16,29 +16,44 @@
       var: config
     run_once: true
 
-  - name: Gather AWPlus switch facts
-    connection: network_cli
-    delegate_to: "{{ config.switch1 }}"
-    alliedtelesis.awplus.awplus_facts: 
-      gather_subset: all
-      gather_network_resources: all
-    register: switchfacts
+  - name: Get running switch config, switch 1
+    delegate_to: "switch{{ config.switch1 }}"
+    vars:
+      switchip: "{{ config.switch1 }}"
+      speed: "{{ config.speed }}"
+      porta: "{{ config.port1 }}"
+      portb: "{{ config.port2 }}"
+    alliedtelesis.awplus.awplus_command:
+      commands:
+        - command: enable
+        - command: sho ru
     run_once: true
 
+  #- name: Gather AWPlus switch facts
+    #connection: network_cli
+    #delegate_to: "switch{{ config.switch1 }}"
+    #alliedtelesis.awplus.awplus_facts: 
+      #gather_subset: all
+      #gather_network_resources: all
+    #register: switchfacts
+    #run_once: true
+#
+# All Linux/Debian tasks will be moved to a Linux specific playbook in a future version.
+#
 
-  - name: Check processes on Linux endpoints
-    become: true
-    shell: ps a | grep endpoint | grep -v grep
-    register: processes
-    when:
-      - ansible_facts['os_family'] == "Debian"
+  #- name: Check processes on Linux endpoints
+    #become: true
+    #shell: ps a | grep endpoint | grep -v grep
+    #register: processes
+    #when:
+      #- ansible_facts['os_family'] == "Debian"
 
-  - name: Verify Chariot Endpoint software is running on Linux endpoints
-    debug:
-      var: processes['stdout_lines']
-    when:
-      - ansible_facts['os_family'] == "Debian"
-      - processes['stdout_lines'][0] != "" 
+  #- name: Verify Chariot Endpoint software is running on Linux endpoints
+    #debug:
+      #var: processes['stdout_lines']
+    #when:
+      #- ansible_facts['os_family'] == "Debian"
+      #- processes['stdout_lines'][0] != "" 
       
   - name: Check processes on Windows endpoints
     win_shell: Get-Service -Name "IxiaEnd*"
@@ -53,24 +68,24 @@
       - ansible_facts['os_family'] == "Windows"
       - "'IxiaEndpoint' in processeswindows['stdout_lines'][3]"
       
-  - name: Set Debian interface speed
-    become: true
-    vars:
-      debmac: "{{ hostvars[inventory_hostname]['ansible_%s' | format(item)]['macaddress'] }}"    
-      goodints:
-        - enp1s0f1
-        - enp1s0f0
-    shell: ethtool -s "{{ item }}" speed "{{ config.speed }}"
-    when:
-      - ansible_facts['os_family'] == "Debian"
-      - item in goodints
-      - "'e0:1a:ea:' in debmac" # TODO: Edit these tests to include ec:cd:6d
-    with_items: "{{ ansible_interfaces }}"
+  #- name: Set Debian interface speed
+    #become: true
+    #vars:
+      #debmac: "{{ hostvars[inventory_hostname]['ansible_%s' | format(item)]['macaddress'] }}"    
+      #goodints:
+        #- enp1s0f1
+        #- enp1s0f0
+    #shell: ethtool -s "{{ item }}" speed "{{ config.speed }}"
+    #when:
+      #- ansible_facts['os_family'] == "Debian"
+      #- item in goodints
+      #- "'e0:1a:ea:' in debmac" # TODO: Edit these tests to include ec:cd:6d
+    #with_items: "{{ ansible_interfaces }}"
 
   - name: Set Windows interface speed
     vars:
       winmac: "{{ item.macaddress }}"
-      runme: ~/testing/powershell/set-speed-{{config.speed}}-on-allied-macs.ps1 # <Do NOT use quotation marks here
+      runme: ~/testing/powershell/set-speed-{{config.speed}}-on-allied-macs.ps1 # <Do NOT use quotation marks around the curly braces here
     ansible.builtin.script: "{{runme}}" #{{ runme }} < This would be wrong, use quotation marks
     when:
       - ansible_facts['os_family'] == "Windows"
@@ -79,12 +94,202 @@
     register: winalliedmacs
 
   - name: Set Switch port speeds
-    delegate_to: "{{ config.switch1 }}"
+    delegate_to: "switch{{ config.switch1 }}"
     vars: 
-      switchhostname: "{{ config.switch1 }}"
       speed: "{{ config.speed }}"
       porta: "{{ config.port1 }}"
       portb: "{{ config.port2 }}"
-    alliedtelesis.awplus.awplus_l2_interfaces:
-      config:
+    alliedtelesis.awplus.awplus_command:
+      commands:
+        - command: enable
+        - command: con t
+        - command: int port1.0.{{porta}}
+        - command: speed {{speed}}
+        - command: duplex full
+        - command: int port1.0.{{portb}}
+        - command: speed {{speed}}
+        - command: duplex full
+        - command: exit
+        - command: exit
     run_once: true
+    
+     # Trigger 1 monitors ports 1-4, the only supported ports at this time. 
+     # This sequence of commands breaks the module if earlier runs don't return to basic prompt with 'exit'
+  - name: Set Switch port monitors to active
+    delegate_to: "switch{{ config.switch1 }}"
+    alliedtelesis.awplus.awplus_command:
+      commands:
+        - command: enable
+        - command: con ter
+        - command: trigger 1
+        - command: help
+        - command: active #Adding a space
+        - command: exit
+        - command: exit
+    run_once: true
+    
+    # Clear history for ports 1-4, -force option to avoid timeout on confirm prompt
+  - name: Delete old Switch port monitor data BEFORE test
+    delegate_to: "switch{{ config.switch1 }}"
+    alliedtelesis.awplus.awplus_command:
+      commands:
+        - command: enable
+        - command: delete force usb:port1.txt
+        - command: delete force usb:port2.txt
+        - command: delete force usb:port3.txt
+        - command: delete force usb:port4.txt
+    run_once: true
+    
+  - name: Run Chariot at test speed between endpoints
+    delegate_to: windows01.attest.com
+    win_shell: |
+      $temppath = "C:\Users\Test\Desktop\ChariotScriptingFiles\Chariot1Gb122to123.ps1"
+      $filepresent = Test-Path -Path $temppath
+      if ($filepresent) {
+          Set-ExecutionPolicy Unrestricted -Scope Process
+          C:\Users\Test\Desktop\ChariotScriptingFiles\Chariot1Gb122to123.ps1
+      }
+    when:
+      - ansible_facts['os_family'] == "Windows"
+
+  # This is a refactoring of the data cleaning shell script 'datclean.sh' found in the ~/testing/shell directory. No need to require user input twice. 
+  - name: Get Switchport Throughput Statistics for Port 1, convert to graph
+    delegate_to: localhost
+    ansible.builtin.shell:
+      cmd: |
+        ssh manager@192.162.1.{{config.switch1}} "copy usb:port{{config.port1}}.txt scp://pi@192.162.1.101:/home/pi/testing/data/port{{config.port1}}.dat"
+        awk 'BEGIN{RS="Switch Port Counters"}{print $242"/"$258","$65","$61}' /home/pi/testing/data/port{{config.port1}}.dat > /home/pi/testing/data/{{config.date}}{{config.time}}-port{{config.port1}}.clean
+        cd /home/pi/testing/shell
+        currentdata=$(ls -t ~/testing/data/ | grep clean | head -n1)
+        echo $currentdata
+        gnuplot -p <<EOF
+        set title "{{config.deviceid}} Throughput Test - FCS Errors and Total Packets\n{/*0.6 Switch{{config.switch1}} - Port 1.0.{{config.port1}} - from datafile $currentdata}" # Set subtitle at half font size
+        set terminal pngcairo dashed
+        set style data lines
+        set output '/home/pi/testing/backups/results-{{config.deviceid}}-switch{{config.switch1}}-port{{config.port1}}-{{config.time}}{{config.date}}-graph.png'
+        FACTOR=0.000001
+        set datafile sep ","
+        set xlabel "Elapsed Time (minutes)"
+        set ylabel "Total Packets (millions)"
+        set y2label "Total FCS Errors"
+        set xtics 30 rotate by -30 offset -0.5
+        set mxtics 6
+        set y2tics 10
+        set my2tics 10
+        set y2range [0:*]
+        set ytics nomirror
+        #set mytics 2
+        set style line 8 lc rgb "gray50" lw 0.5 lt 1
+        set style line 4 lc rgb "gray80" lw 0.5 lt 1
+        set grid mxtics xtics ls 8, ls 4
+        plot \
+        '/home/pi/testing/data/$currentdata' using 0:2 t "FCS Errors" w steps axes x1y2, \
+        '/home/pi/testing/data/$currentdata' using 0:(\$3*FACTOR) t "Packets" w lines
+        EOF
+        echo "Data graphing finished"
+        cd /home/pi/testing/backups
+        xdg-open $(ls -t /home/pi/testing/backups | grep graph.png | head -n1)
+        echo "Graph opening finished"
+    run_once: true
+
+  - name: Get Switchport Throughput Statistics for Port 2, convert to graph
+    delegate_to: localhost
+    ansible.builtin.shell:
+      cmd: |
+        ssh manager@192.162.1.{{config.switch1}} "copy usb:port{{config.port2}}.txt scp://pi@192.162.1.101:/home/pi/testing/data/port{{config.port2}}.dat"
+        awk 'BEGIN{RS="Switch Port Counters"}{print $242"/"$258","$65","$61}' /home/pi/testing/data/port{{config.port2}}.dat > /home/pi/testing/data/{{config.date}}{{config.time}}-port{{config.port2}}.clean
+        cd /home/pi/testing/shell
+        currentdata=$(ls -t ~/testing/data/ | grep clean | head -n1)
+        echo $currentdata
+        gnuplot -p <<EOF
+        set title "{{config.deviceid}} Throughput Test - FCS Errors and Total Packets\n{/*0.6 Switch{{config.switch1}} - Port 1.0.{{config.port2}} - from datafile $currentdata}" # Set subtitle at half font size
+        set terminal pngcairo dashed
+        set style data lines
+        set output '/home/pi/testing/backups/results-{{config.deviceid}}-switch{{config.switch1}}-port{{config.port2}}-{{config.time}}{{config.date}}-graph.png'
+        FACTOR=0.000001
+        set datafile sep ","
+        set xlabel "Elapsed Time (minutes)"
+        set ylabel "Total Packets (millions)"
+        set y2label "Total FCS Errors"
+        set xtics 30 rotate by -30 offset -0.5
+        set mxtics 6
+        set y2tics 10
+        set my2tics 10
+        set y2range [0:*]
+        set ytics nomirror
+        #set mytics 2
+        set style line 8 lc rgb "gray50" lw 0.5 lt 1
+        set style line 4 lc rgb "gray80" lw 0.5 lt 1
+        set grid mxtics xtics ls 8, ls 4
+        plot \
+        '/home/pi/testing/data/$currentdata' using 0:2 t "FCS Errors" w steps axes x1y2, \
+        '/home/pi/testing/data/$currentdata' using 0:(\$3*FACTOR) t "Packets" w lines
+        EOF
+        echo "Data graphing finished"
+        cd /home/pi/testing/backups
+        xdg-open $(ls -t /home/pi/testing/backups | grep graph.png | head -n1)
+        echo "Graph opening finished"
+    run_once: true
+    
+  - name: Set Windows interface MTU to Jumbo Frame enabled
+    vars:
+      winmac: "{{ item.macaddress }}"
+      runme: ~/testing/powershell/set-jumbo-enabled-on-allied-macs.ps1 # <Do NOT use quotation marks around the curly braces here
+    ansible.builtin.script: "{{runme}}" #{{ runme }} < This would be wrong, use quotation marks
+    when:
+      - ansible_facts['os_family'] == "Windows"
+      - "'E0:1A:EA:' in winmac" # TODO: Edit these tests to include EC:CD:6D
+    with_items: "{{ ansible_interfaces }}"
+    register: winalliedmacs
+  
+  - name: Set Switch port to receive Jumbo Frames
+    delegate_to: "switch{{ config.switch1 }}"
+    vars: 
+      porta: "{{ config.port1 }}"
+      portb: "{{ config.port2 }}"
+    alliedtelesis.awplus.awplus_command:
+      commands:
+        - command: enable
+        - command: con t
+        - command: int port1.0.{{porta}}
+        - command: mru 10000
+        - command: int port1.0.{{portb}}
+        - command: mru 10000
+        - command: exit
+        - command: exit
+    run_once: true
+  
+  - name: Test Jumbo Frames
+    delegate_to: 192.162.1.121 # This or .120 would be fine, just change target of ping. 
+    vars:
+      winmac: "{{ item.macaddress }}"
+      runme: ~/testing/powershell/test-jumbo-enabled-on-allied-macs.ps1
+    ansible.builtin.script: "{{runme}}" 
+    when:
+      - ansible_facts['os_family'] == "Windows"
+      - "'E0:1A:EA:' in winmac" # TODO: Edit these tests to include EC:CD:6D
+    with_items: "{{ ansible_interfaces }}"
+    register: jumboresult
+  
+  - name: Set Windows interface MTU to Jumbo Frame disabled
+    vars:
+      winmac: "{{ item.macaddress }}"
+      runme: ~/testing/powershell/set-jumbo-disabled-on-allied-macs.ps1 # <Do NOT use quotation marks around the curly braces here
+    ansible.builtin.script: "{{runme}}" #{{ runme }} < This would be wrong, use quotation marks
+    when:
+      - ansible_facts['os_family'] == "Windows"
+      - "'E0:1A:EA:' in winmac" # TODO: Edit these tests to include EC:CD:6D
+    with_items: "{{ ansible_interfaces }}"
+    register: winalliedmacs
+  
+  - name: Test Jumbo Frames
+    delegate_to: 192.162.1.121 # Either this or 120 would be fine, just change target of ping. 
+    vars:
+      winmac: "{{ item.macaddress }}"
+      runme: ~/testing/powershell/test-jumbo-enabled-on-allied-macs.ps1
+    ansible.builtin.script: "{{runme}}" 
+    when:
+      - ansible_facts['os_family'] == "Windows"
+      - "'E0:1A:EA:' in winmac" # TODO: Edit these tests to include EC:CD:6D
+    with_items: "{{ ansible_interfaces }}"
+    register: jumboresult2

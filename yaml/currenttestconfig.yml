@@ -1,10 +1,11 @@
-deviceid: se
-host1: ef
-host2: ef
-duration: ef
-speed: auto
-date: 220207
-time: 134614
-switch1: switch131
+deviceid: DMC1000gn
+host1: Windows
+host2: Windows
+duration: 15
+speed: 1000
+date: 220315
+time: 131814
+switch1: 133
 port1: 1
-port2: 
+port2: 3
+options: 1 2 3
