@@ -153,7 +153,7 @@
       - ansible_facts['os_family'] == "Windows"
 
   # This is a refactoring of the data cleaning shell script 'datclean.sh' found in the ~/testing/shell directory. No need to require user input twice. 
-  - name: Get Switchport Statistics for Port 1, convert to graph
+  - name: Get Switchport Throughput Statistics for Port 1, convert to graph
     delegate_to: localhost
     ansible.builtin.shell:
       cmd: |
@@ -192,7 +192,7 @@
         echo "Graph opening finished"
     run_once: true
 
-  - name: Get Switchport Statistics for Port 2, convert to graph
+  - name: Get Switchport Throughput Statistics for Port 2, convert to graph
     delegate_to: localhost
     ansible.builtin.shell:
       cmd: |
@@ -231,17 +231,44 @@
         echo "Graph opening finished"
     run_once: true
     
-  #- name: Delete old Switch port monitor data AFTER test
-    #delegate_to: "switch{{ config.switch1 }}"
-    #alliedtelesis.awplus.awplus_command:
-      #commands:
-        #- command: enable
-        #- command: delete usb:port1.txt
-        #- command: y
-        #- command: delete usb:port2.txt
-        #- command: y
-        #- command: delete usb:port3.txt
-        #- command: y
-        #- command: delete usb:port4.txt
-        #- command: y
-    #run_once: true
+  - name: Set Windows interface MTU to Jumbo Frame enabled
+    vars:
+      winmac: "{{ item.macaddress }}"
+      runme: ~/testing/powershell/set-jumbo-enabled-on-allied-macs.ps1 # <Do NOT use quotation marks around the curly braces here
+    ansible.builtin.script: "{{runme}}" #{{ runme }} < This would be wrong, use quotation marks
+    when:
+      - ansible_facts['os_family'] == "Windows"
+      - "'E0:1A:EA:' in winmac" # TODO: Edit these tests to include EC:CD:6D
+    with_items: "{{ ansible_interfaces }}"
+    register: winalliedmacs
+  
+  - name: Set Switch port to receive Jumbo Frames
+    delegate_to: "switch{{ config.switch1 }}"
+    vars: 
+      porta: "{{ config.port1 }}"
+      portb: "{{ config.port2 }}"
+    alliedtelesis.awplus.awplus_command:
+      commands:
+        - command: enable
+        - command: con t
+        - command: int port1.0.{{porta}}
+        - command: mru 10000
+        - command: int port1.0.{{portb}}
+        - command: mru 10000
+        - command: exit
+        - command: exit
+    run_once: true
+  
+  - name: Test Jumbo Frames
+    delegate_to: 192.162.1.121 # Either this or 120 would be fine, just change target of ping. 
+    vars:
+      winmac: "{{ item.macaddress }}"
+      runme: ~/testing/powershell/test-jumbo-enabled-on-allied-macs.ps1 # <Do NOT use quotation marks around the curly braces here
+    ansible.builtin.script: "{{runme}}" #{{ runme }} < This would be wrong, use quotation marks
+    when:
+      - ansible_facts['os_family'] == "Windows"
+      - "'E0:1A:EA:' in winmac" # TODO: Edit these tests to include EC:CD:6D
+    with_items: "{{ ansible_interfaces }}"
+    register: jumboresult
+  
+  
