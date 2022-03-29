@@ -4,13 +4,15 @@
 exec 3>&1;
 uut=$(dialog --title "Test Configuration" --inputbox "Enter the name of the device being tested:" 0 0 2>&1 1>&3);
 host1=$(dialog --title "$uut Test Configuration: Host A" --radiolist "Select (with Space) the OS family of Test PC 1:" 20 60 7 2>&1 1>&3 \
-Windows "(All versions)" on \
-Linux "(All versions)" off \
+0 "Windows" on \
+1 "Linux" off \
+2 "Windows and Linux" off \
 );
 host2=$(dialog --title "$uut Test Configuration: Host B" --radiolist "Select (with Space) the OS family of Test PC 2:" 20 60 7 2>&1 1>&3 \
 Windows "(All versions)" on \
 Linux "(All versions)" off \
 );
+#TODO: Compile scripts for each length of time at each common speed. Compile outliers as requested by testers.
 duration=$(dialog --title "$uut Test Configuration: Test Duration" --radiolist "Select (with Space) the test duration (in minutes) of the test: [Default: 15 Minutes]" 20 60 7 2>&1 1>&3 \
 1 "Minute" off \
 15 "Minutes" on \
@@ -37,11 +39,7 @@ auto "Auto-negotiate" on \
 );
 octet=$(dialog --title "$uut Test Configuration: Switch IP" --inputbox "Enter the last octet of Switch IP [i.e. xx in 192.162.1.xx]:" 0 0 2>&1 1>&3);
 port1=$(dialog --title "$uut Test Configuration: Port IDs" --inputbox "Enter the first switch port to monitor [i.e. x in port1.0.x]:" 0 0 2>&1 1>&3);
-#cable1=$(dialog --inputbox "Type of cable connected to port1.0.$port1:" 0 0 2>&1 1>&3);
-#cable1length=$(dialog --inputbox "Length (meters) of the cable connected to port1.0.$port1:" 0 0 2>&1 1>&3);
 port2=$(dialog --title "$uut Test Configuration: Port IDs" --inputbox "Enter the second switch port to monitor [i.e. x in port1.0.x]:" 0 0 2>&1 1>&3);
-#cable2=$(dialog --inputbox "Type of cable connected to port1.0.$port2" 0 0 2>&1 1>&3);
-#cable2length=$(dialog --inputbox "Length (meters) of the cable connected to port1.0.$port2:" 0 0 2>&1 1>&3);
 exec 3>&-;
 
 # Time/date used to create unique filenames for now
@@ -72,7 +70,14 @@ echo "Previous Configuration data saved to $backupdir$filenamebackup";
 echo "Current Configuration data saved to $yamldir$filename";
 echo " ... "
 
-## Enter the main testing Ansible playbook. This may be split up into multiple playbooks soon because of increasing complexity. 
+## Enter the main testing Ansible playbook based on OSes in use. This may be split up into multiple playbooks soon because of increasing complexity. 
 ## Multiple Passwords required for encryption and escalation (--ask-become-pass & --ask-vault-pass)
 ## Ask permission for each step of the way (--step)
-ansible-playbook --ask-become-pass --ask-vault-pass ~/testing/yaml/test.yml
+if ($testtype = 0)        
+    ansible-playbook --ask-become-pass --ask-vault-pass ~/testing/yaml/wintest.yml
+else if ($testtype = 1)
+    ansible-playbook --ask-become-pass --ask-vault-pass ~/testing/yaml/lintest.yml
+else if ($testtype = 2)
+    ansible-playbook --ask-become-pass --ask-vault-pass ~/testing/yaml/winlintest.yml
+else
+    echo "Error, no Operating Systems selected. Please restart configuration."
