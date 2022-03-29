@@ -1,5 +1,5 @@
 # EC-CD-6D or E0-1A-EA
-$CurrMac = get-netadapter | Where {$_.MacAddress -Like "E0-1A-EA*"} | Where {$_.Status -ne "Disabled"}
+$CurrMac = get-netadapter | Where-Object {$_.MacAddress -Like "E0-1A-EA*"} | Where-Object {$_.Status -ne "Disabled"}
 $SpeedSetting = "6" # 1gb full duplex
 # Later, a ForEach ($adap in $CurrMac ........ )
 Set-NetAdapterAdvancedProperty $CurrMac.Name -DisplayName "Speed*" -RegistryValue $SpeedSetting
