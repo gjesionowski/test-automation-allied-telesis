@@ -1,5 +1,5 @@
 $jumboping=ping 192.162.1.123 -l 8000 -f -S 192.162.1.122
-echo $jumboping
+Write-Output $jumboping
 
   #- name: Check Jumbo Frame results
     #delegate_to: 192.162.1.121

@@ -234,6 +234,18 @@
       - "'E0:1A:EA:' in winmac" # TODO: Edit these tests to include EC:CD:6D
     with_items: "{{ ansible_interfaces }}"
     register: jumboresult
+
+  - name: Test Jumbo Frames
+    delegate_to: 192.162.1.121 # This or .120 would be fine, just change target of ping. 
+    vars:
+      winmac: "{{ item.macaddress }}"
+      runme: ~/testing/powershell/test-jumbo-enabled-on-allied-macs.ps1
+    ansible.builtin.script: "{{runme}}" 
+    when:
+      - ansible_facts['os_family'] == "Windows"
+      - "'E0:1A:EA:' in winmac" # TODO: Edit these tests to include EC:CD:6D
+    with_items: "{{ ansible_interfaces }}"
+    register: jumboresult
   
   - name: Set Windows interface MTU to Jumbo Frame disabled
     vars:
