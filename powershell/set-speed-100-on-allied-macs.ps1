@@ -1,6 +1,6 @@
 # EC-CD-6D or E0-1A-EA
 
-$SpeedSetting = "4" # 10gb full duplex	
+$SpeedSetting = "4" # 100mb full duplex	
 
 $CurrMac = get-netadapter | Where-Object {$_.MacAddress -Like "E0-1A-EA*"} | Where-Object {$_.Status -Like "Up"}
 #If no matches found, don't try

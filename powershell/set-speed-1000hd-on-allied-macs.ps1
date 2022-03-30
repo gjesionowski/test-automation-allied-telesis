@@ -1,5 +1,6 @@
 # EC-CD-6D or E0-1A-EA
-$SpeedSetting = "0" # auto-negotiate
+
+$SpeedSetting = "5" # 1000mb half duplex, possibly use to test collision counter	
 
 $CurrMac = get-netadapter | Where-Object {$_.MacAddress -Like "E0-1A-EA*"} | Where-Object {$_.Status -Like "Up"}
 #If no matches found, don't try
