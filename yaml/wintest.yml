@@ -45,18 +45,21 @@
   - name: Set Windows interface speed
     vars:
       winmac: "{{ item.macaddress }}"
-      runme: ~/testing/powershell/set-speed-{{config.speed}}-on-allied-macs.ps1 # <Do NOT use quotation marks around the curly braces here
+      speedcheck: "{{ config.speed }}"
+      runme: ~/testing/powershell/set-speed-6-on-allied-macs.ps1 # <Do NOT use quotation marks around the curly braces here
     ansible.builtin.script: "{{runme}}" #{{ runme }} < This would be wrong, use quotation marks
     when:
       - ansible_facts['os_family'] == "Windows"
       - "'E0:1A:EA:' in winmac" # TODO: Edit these tests to include EC:CD:6D
+      - "'6' in speedcheck"
     with_items: "{{ ansible_interfaces }}"
     register: winalliedmacs
 
   - name: Set Switch port speeds
     delegate_to: "switch{{ config.switch1 }}"
-    vars: 
-      speed: "{{ config.speed }}"
+    vars:
+      speedcheck: "{{ config.speed }}"
+      speed: "1000"
       porta: "{{ config.port1 }}"
       portb: "{{ config.port2 }}"
     alliedtelesis.awplus.awplus_command:
@@ -71,6 +74,8 @@
         - command: duplex full
         - command: exit
         - command: exit
+    when: 
+      - "'6' in speedcheck"
     run_once: true
     
      # Trigger 1 monitors ports 1-4, the only supported ports at this time. 
@@ -82,7 +87,6 @@
         - command: enable
         - command: con ter
         - command: trigger 1
-        - command: help
         - command: active #Adding a space
         - command: exit
         - command: exit
@@ -102,6 +106,8 @@
     
   - name: Run Chariot at test speed between endpoints
     delegate_to: windows01.attest.com
+    vars:
+      speedcheck: "{{ config.speed }}"
     win_shell: |
       $temppath = "C:\Users\Test\Desktop\ChariotScriptingFiles\Chariot1Gb122to123.ps1"
       $filepresent = Test-Path -Path $temppath
@@ -111,6 +117,7 @@
       }
     when:
       - ansible_facts['os_family'] == "Windows"
+      - "'6' in speedcheck"
 
   # This is a refactoring of the data cleaning shell script 'datclean.sh' found in the ~/testing/shell directory. No need to require user input twice. 
   - name: Get Switchport Throughput Statistics for Port 1, convert to graph
@@ -193,12 +200,14 @@
     
   - name: Set Windows interface MTU to Jumbo Frame enabled
     vars:
+      jumbocheck: "{{ config.options }}"
       winmac: "{{ item.macaddress }}"
       runme: ~/testing/powershell/set-jumbo-enabled-on-allied-macs.ps1 # <Do NOT use quotation marks around the curly braces here
     ansible.builtin.script: "{{runme}}" #{{ runme }} < This would be wrong, use quotation marks
     when:
       - ansible_facts['os_family'] == "Windows"
       - "'E0:1A:EA:' in winmac" # TODO: Edit these tests to include EC:CD:6D
+      - "'1' in jumbocheck"
     with_items: "{{ ansible_interfaces }}"
     register: winalliedmacs
   
@@ -217,28 +226,34 @@
         - command: mru 10000
         - command: exit
         - command: exit
+    when: 
+      - "'1' in jumbocheck"
     run_once: true
   
   - name: Test Jumbo Frames
     delegate_to: 192.162.1.121 # This or .120 would be fine, just change target of ping. 
     vars:
       winmac: "{{ item.macaddress }}"
+      jumbocheck: "{{ config.options }}"
       runme: ~/testing/powershell/test-jumbo-enabled-on-allied-macs.ps1
     ansible.builtin.script: "{{runme}}" 
     when:
       - ansible_facts['os_family'] == "Windows"
       - "'E0:1A:EA:' in winmac" # TODO: Edit these tests to include EC:CD:6D
+      - "'1' in jumbocheck"
     with_items: "{{ ansible_interfaces }}"
     register: jumboresult
   
   - name: Set Windows interface MTU to Jumbo Frame disabled
     vars:
       winmac: "{{ item.macaddress }}"
+      jumbocheck: "{{ config.options }}"
       runme: ~/testing/powershell/set-jumbo-disabled-on-allied-macs.ps1 # <Do NOT use quotation marks around the curly braces here
     ansible.builtin.script: "{{runme}}" #{{ runme }} < This would be wrong, use quotation marks
     when:
       - ansible_facts['os_family'] == "Windows"
       - "'E0:1A:EA:' in winmac" # TODO: Edit these tests to include EC:CD:6D
+      - "'1' in jumbocheck"
     with_items: "{{ ansible_interfaces }}"
     register: winalliedmacs
   
@@ -246,10 +261,12 @@
     delegate_to: 192.162.1.121 # Either this or 120 would be fine, just change target of ping. 
     vars:
       winmac: "{{ item.macaddress }}"
+      jumbocheck: "{{ config.options }}"
       runme: ~/testing/powershell/test-jumbo-enabled-on-allied-macs.ps1
     ansible.builtin.script: "{{runme}}" 
     when:
       - ansible_facts['os_family'] == "Windows"
       - "'E0:1A:EA:' in winmac" # TODO: Edit these tests to include EC:CD:6D
+      - "'1' in jumbocheck"
     with_items: "{{ ansible_interfaces }}"
     register: jumboresult2

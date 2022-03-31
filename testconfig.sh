@@ -26,16 +26,16 @@ testlist=$(dialog --title "$uut Test Configuration: Test Duration" --checklist "
 2 Wake-on-LAN on \
 3 Throughput on \
 4 HLK off  \
+5
 );
-# This will let the tester choose multiple speeds, and the playbook will run tasks only if the appropriate speed is chosen here
-speed=$(dialog --title "$uut Test Configuration: Speed Setting" --checklist "Select (with Space) the test speed(s) and press Enter [Default: Auto-negotiate only]:" 20 60 7 2>&1 1>&3 \
+# --checklist sounds nice, but breaks the playbooks. {{config.speed}} returning an array is no good when we have it set to static script calls.
+speed=$(dialog --title "$uut Test Configuration: Speed Setting" --radiolist "Select (with Space) the test speed(s) and press Enter [Default: Auto-negotiate only]:" 20 60 7 2>&1 1>&3 \
 auto "Auto-negotiate" on \
 100 "100 Mbps, Full Duplex" off \
 1000 "1000 Mbps, Full Duplex" off \
 10000 "10 Gbps, Full Duplex" off  \
 100hd "100 Mbps, Half Duplex" off \
 1000hd "1000 Mbps, Half Duplex" off \
-10000hd "10 Gbps, Half Duplex" off  \
 );
 # This setup only works with a single switch right now, but that switch can be .133 or .137 (ssh must be configured in advance using PKI)
 octet=$(dialog --title "$uut Test Configuration: Switch IP" --inputbox "Enter the last octet of Switch IP [xx in 192.162.1.xx]:" 0 0 2>&1 1>&3);
