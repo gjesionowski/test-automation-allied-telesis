@@ -3,14 +3,12 @@
 # Stream 3 into 1 ;; Then stream 2 into 1 + 1 into 3 ;; Gives stderror and stdout
 exec 3>&1;
 uut=$(dialog --title "Test Configuration" --inputbox "Enter the name of the device being tested:" 0 0 2>&1 1>&3);
-host1=$(dialog --title "$uut Test Configuration: Host A" --radiolist "Select (with Space) the OS family of Test PC 1:" 20 60 7 2>&1 1>&3 \
-Windows "(All versions)" on \
-Linux "(All versions)" off \
+hosts=$(dialog --title "$uut Test Configuration: Which OS is being tested with?" --radiolist "Select (with Space) the OS family of Test PC 1:" 20 60 7 2>&1 1>&3 \
+0 Windows on \
+1 Linux off \
+2 "Windows and Linux" off \
 );
-host2=$(dialog --title "$uut Test Configuration: Host B" --radiolist "Select (with Space) the OS family of Test PC 2:" 20 60 7 2>&1 1>&3 \
-Windows "(All versions)" on \
-Linux "(All versions)" off \
-);
+#TODO: Compile scripts for each length of time at each common speed. run_me would look like "{{config.speed}}-{{config.duration}}-IPa-IPb.exe" Compile outliers as requested by testers.
 duration=$(dialog --title "$uut Test Configuration: Test Duration" --radiolist "Select (with Space) the test duration (in minutes) of the test: [Default: 15 Minutes]" 20 60 7 2>&1 1>&3 \
 1 "Minute" off \
 15 "Minutes" on \
@@ -29,19 +27,19 @@ testlist=$(dialog --title "$uut Test Configuration: Test Duration" --checklist "
 3 Throughput on \
 4 HLK off  \
 );
-speed=$(dialog --title "$uut Test Configuration: Speed Setting" --radiolist "Select (with Space) the test speed and press Enter [Default: Auto-negotiate]:" 20 60 7 2>&1 1>&3 \
-100 "Mbps, Full Duplex" off \
-1000 "Mbps, Full Duplex" off \
-10000 "Mbps, Full Duplex" off  \
-auto "Auto-negotiate" on \
+# --checklist sounds nice, but breaks the playbooks. {{config.speed}} returning an array is no good when we have it set to static script calls.
+speed=$(dialog --title "$uut Test Configuration: Speed Setting" --checklist "Select (with Space) the test speed(s) and press Enter [Default: Auto-negotiate only]:" 20 60 15 2>&1 1>&3 \
+0 "Auto-negotiate" on \
+4 "100 Mbps, Full Duplex" off \
+6 "1000 Mbps, Full Duplex" off \
+7 "10 Gbps, Full Duplex" off  \
+3 "100 Mbps, Half Duplex" off \
+5 "1000 Mbps, Half Duplex" off \
 );
-octet=$(dialog --title "$uut Test Configuration: Switch IP" --inputbox "Enter the last octet of Switch IP [i.e. xx in 192.162.1.xx]:" 0 0 2>&1 1>&3);
-port1=$(dialog --title "$uut Test Configuration: Port IDs" --inputbox "Enter the first switch port to monitor [i.e. x in port1.0.x]:" 0 0 2>&1 1>&3);
-#cable1=$(dialog --inputbox "Type of cable connected to port1.0.$port1:" 0 0 2>&1 1>&3);
-#cable1length=$(dialog --inputbox "Length (meters) of the cable connected to port1.0.$port1:" 0 0 2>&1 1>&3);
-port2=$(dialog --title "$uut Test Configuration: Port IDs" --inputbox "Enter the second switch port to monitor [i.e. x in port1.0.x]:" 0 0 2>&1 1>&3);
-#cable2=$(dialog --inputbox "Type of cable connected to port1.0.$port2" 0 0 2>&1 1>&3);
-#cable2length=$(dialog --inputbox "Length (meters) of the cable connected to port1.0.$port2:" 0 0 2>&1 1>&3);
+# This setup only works with a single switch right now, but that switch can be .133 or .137 (ssh must be configured in advance using PKI)
+octet=$(dialog --title "$uut Test Configuration: Switch IP" --inputbox "Enter the last octet of Switch IP [xx in 192.162.1.xx]:" 0 0 2>&1 1>&3);
+port1=$(dialog --title "$uut Test Configuration: Port IDs" --inputbox "Enter the first switch port to monitor [x in port1.0.x]:" 0 0 2>&1 1>&3);
+port2=$(dialog --title "$uut Test Configuration: Port IDs" --inputbox "Enter the second switch port to monitor [x in port1.0.x]:" 0 0 2>&1 1>&3);
 exec 3>&-;
 
 # Time/date used to create unique filenames for now
@@ -55,7 +53,7 @@ filenamemain=currenttestconfig.yml;
 filenamebackup=$date-$time-backup-$filenamemain.old;
 filename=$filenamemain;
 
-# Backs up old config -> Remains to be seen if this is necessary
+# Backs up old config -> Remains to be seen if this is necessary, but the output to screen is reassuring while testing new Tasks
 echo " ... "
 echo "Previous Configuration data"
 printf '%s\n' "$(cat $yamldir$filenamemain)" | tee $backupdir$filenamebackup;
@@ -63,8 +61,8 @@ echo " ... "
 # Writes the new config
 echo " ... "
 echo "Current Configuration data"
-printf '%s\n' "deviceid: $uut" "host1: $host1" "host2: $host2" "duration: $duration" "speed: $speed" "date: $date" "time: $time" "switch1: $octet" "port1: $port1" "port2: $port2" "options: $testlist" | tee $yamldir$filename;
-#ORIGINAL: printf '%s\n' "deviceid: $uut" "host1: $host1" "host2: $host2" "duration: $duration" "speed: $speed" "date: $date" "time: $time" "switch1: switch$octet" "port1: $port1" "port2: $port2" | tee $yamldir$filename;
+printf '%s\n' "deviceid: $uut" "hosts: $hosts" "duration: $duration" "speed: $speed" "date: $date" "time: $time" "switch1: $octet" "port1: $port1" "port2: $port2" "options: $testlist" | tee $yamldir$filename;
+#ORIGINAL: printf '%s\n' "deviceid: $uut" "hosts: $hosts" "host2: $host2" "duration: $duration" "speed: $speed" "date: $date" "time: $time" "switch1: switch$octet" "port1: $port1" "port2: $port2" | tee $yamldir$filename;
 echo " ... "
 # Debugging and user benefit
 echo " ... "
@@ -72,7 +70,14 @@ echo "Previous Configuration data saved to $backupdir$filenamebackup";
 echo "Current Configuration data saved to $yamldir$filename";
 echo " ... "
 
-## Enter the main testing Ansible playbook. This may be split up into multiple playbooks soon because of increasing complexity. 
+## Enter the main testing Ansible playbook based on OSes in use. This has been split up into multiple playbooks. 
 ## Multiple Passwords required for encryption and escalation (--ask-become-pass & --ask-vault-pass)
 ## Ask permission for each step of the way (--step)
-ansible-playbook --ask-become-pass --ask-vault-pass ~/testing/yaml/test.yml
+if ($hosts = 0)        
+    ansible-playbook --ask-become-pass --ask-vault-pass ~/testing/yaml/wintest.yml
+else if ($hosts = 1)
+    ansible-playbook --ask-become-pass --ask-vault-pass ~/testing/yaml/lintest.yml
+else if ($hosts = 2)
+    ansible-playbook --ask-become-pass --ask-vault-pass ~/testing/yaml/winlintest.yml
+else
+    echo "Error, no Operating Systems targeted. Please restart configuration and choose a valid option for Host OSes."
